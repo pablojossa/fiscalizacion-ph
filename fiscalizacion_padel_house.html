@@ -319,6 +319,7 @@
           <option value="PHMASTER">PHMASTER</option>
           <option value="Relámpago">Relámpago</option>
           <option value="Interclubes">Interclubes</option>
+          <option value="Otro">Otro</option>
         </select>
       </div>
       <div>
@@ -336,15 +337,7 @@
     </div>
     <div>
       <label>Categoría del torneo</label>
-      <div class="cat-pills" id="catPills">
-        <span class="pill" onclick="selectCat(this,'1ra')">1ra</span>
-        <span class="pill" onclick="selectCat(this,'2da')">2da</span>
-        <span class="pill" onclick="selectCat(this,'3ra')">3ra</span>
-        <span class="pill" onclick="selectCat(this,'4ta')">4ta</span>
-        <span class="pill" onclick="selectCat(this,'5ta')">5ta</span>
-        <span class="pill" onclick="selectCat(this,'Femenino')">Femenino</span>
-        <span class="pill" onclick="selectCat(this,'Mixto')">Mixto</span>
-      </div>
+      <div id="catTorneoContainer" style="margin-top:8px;"></div>
       <input type="text" id="catTorneo" placeholder="O escribe la categoría…" style="margin-top:8px;">
     </div>
   </div>
@@ -361,13 +354,7 @@
       </div>
       <div>
         <label>Categoría en fiscalización</label>
-        <div class="cat-pills">
-          <span class="pill" onclick="selectCatJ(this,'j1cat','1ra')">1ra</span>
-          <span class="pill" onclick="selectCatJ(this,'j1cat','2da')">2da</span>
-          <span class="pill" onclick="selectCatJ(this,'j1cat','3ra')">3ra</span>
-          <span class="pill" onclick="selectCatJ(this,'j1cat','4ta')">4ta</span>
-          <span class="pill" onclick="selectCatJ(this,'j1cat','5ta')">5ta</span>
-        </div>
+        <div id="j1catContainer" style="margin-top:6px;"></div>
         <input type="text" id="j1cat" placeholder="O escribe la categoría…" style="margin-top:8px;">
       </div>
     </div>
@@ -383,13 +370,7 @@
       </div>
       <div>
         <label>Categoría en fiscalización</label>
-        <div class="cat-pills">
-          <span class="pill" onclick="selectCatJ(this,'j2cat','1ra')">1ra</span>
-          <span class="pill" onclick="selectCatJ(this,'j2cat','2da')">2da</span>
-          <span class="pill" onclick="selectCatJ(this,'j2cat','3ra')">3ra</span>
-          <span class="pill" onclick="selectCatJ(this,'j2cat','4ta')">4ta</span>
-          <span class="pill" onclick="selectCatJ(this,'j2cat','5ta')">5ta</span>
-        </div>
+        <div id="j2catContainer" style="margin-top:6px;"></div>
         <input type="text" id="j2cat" placeholder="O escribe la categoría…" style="margin-top:8px;">
       </div>
     </div>
@@ -425,25 +406,150 @@
 </div>
 
 <script>
-  let catTorneoSeleccionada = '';
+  // ── CATEGORY DATA ──────────────────────────────────────────────
+  const CATS_TORNEO = {
+    masc: {
+      label: 'Masculino',
+      groups: [
+        { label: 'Numéricas', items: ['2da','3ra','4ta','5ta','6ta','7ma'] },
+        { label: 'Suma', items: ['Suma 6','Suma 7','Suma 8','Suma 9','Suma 10','Suma 11','Suma 12','Suma 13'] }
+      ]
+    },
+    fem: {
+      label: 'Femenino',
+      groups: [ { label: '', items: ['A','B','C','D'] } ]
+    },
+    mixto: {
+      label: 'Mixto',
+      groups: [ { label: '', items: ['Iniciación','Intermedio','Avanzado'] } ]
+    }
+  };
 
-  function selectCat(el, val) {
-    document.querySelectorAll('#catPills .pill').forEach(p => p.classList.remove('active'));
-    el.classList.add('active');
-    catTorneoSeleccionada = val;
+  const CATS_JUGADOR = {
+    masc: {
+      label: 'Masculino',
+      groups: [
+        { label: '', items: ['2da','3ra','4ta','5ta','6ta','7ma'] }
+      ]
+    },
+    fem: {
+      label: 'Femenino',
+      groups: [ { label: '', items: ['A','B','C','D'] } ]
+    }
+  };
+
+  // ── RENDER TORNEO PILLS (sin +/-) ──────────────────────────────
+  function makeTorneoPills(containerId, onClickFn) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+    container.innerHTML = '';
+
+    Object.values(CATS_TORNEO).forEach(section => {
+      const sectionLabel = document.createElement('div');
+      sectionLabel.style.cssText = 'font-size:10px;letter-spacing:1.5px;color:var(--accent);text-transform:uppercase;margin:10px 0 4px;font-weight:600;';
+      sectionLabel.textContent = section.label;
+      container.appendChild(sectionLabel);
+
+      section.groups.forEach(group => {
+        if (group.label) {
+          const gl = document.createElement('div');
+          gl.style.cssText = 'font-size:9px;letter-spacing:1px;color:var(--muted);text-transform:uppercase;margin:5px 0 3px;';
+          gl.textContent = group.label;
+          container.appendChild(gl);
+        }
+        const row = document.createElement('div');
+        row.className = 'cat-pills';
+        row.style.marginBottom = '4px';
+
+        group.items.forEach(base => {
+          const prefix = section.label === 'Femenino' ? 'Fem ' : (section.label === 'Mixto' ? 'Mixto ' : '');
+          const val = prefix + base;
+          const p = document.createElement('span');
+          p.className = 'pill';
+          p.textContent = base;
+          p.onclick = () => onClickFn(p, val, containerId);
+          row.appendChild(p);
+        });
+        container.appendChild(row);
+      });
+    });
+  }
+
+  // ── RENDER JUGADOR PILLS (con +/-) ─────────────────────────────
+  function makeJugadorPills(containerId, onClickFn) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+    container.innerHTML = '';
+
+    Object.values(CATS_JUGADOR).forEach(section => {
+      const sectionLabel = document.createElement('div');
+      sectionLabel.style.cssText = 'font-size:10px;letter-spacing:1.5px;color:var(--accent);text-transform:uppercase;margin:10px 0 4px;font-weight:600;';
+      sectionLabel.textContent = section.label;
+      container.appendChild(sectionLabel);
+
+      section.groups.forEach(group => {
+        if (group.label) {
+          const gl = document.createElement('div');
+          gl.style.cssText = 'font-size:9px;letter-spacing:1px;color:var(--muted);text-transform:uppercase;margin:5px 0 3px;';
+          gl.textContent = group.label;
+          container.appendChild(gl);
+        }
+
+        group.items.forEach(base => {
+          const isSuma = base.startsWith('Suma');
+          const prefix = section.label === 'Femenino' ? 'Fem ' : (section.label === 'Mixto' ? 'Mixto ' : '');
+
+          if (isSuma) {
+            const row = document.createElement('div');
+            row.className = 'cat-pills';
+            row.style.marginBottom = '3px';
+            const p = document.createElement('span');
+            p.className = 'pill';
+            p.textContent = base;
+            p.onclick = () => onClickFn(p, base, containerId);
+            row.appendChild(p);
+            container.appendChild(row);
+          } else {
+            const row = document.createElement('div');
+            row.style.cssText = 'display:flex;gap:4px;margin-bottom:5px;align-items:center;';
+            const lbl = document.createElement('span');
+            lbl.style.cssText = 'font-size:10px;color:var(--muted);min-width:52px;';
+            lbl.textContent = base + ':';
+            row.appendChild(lbl);
+            ['+','','−'].forEach(suffix => {
+              const val = prefix + base + suffix;
+              const p = document.createElement('span');
+              p.className = 'pill';
+              p.textContent = suffix === '' ? base : base + suffix;
+              p.onclick = () => onClickFn(p, val, containerId);
+              row.appendChild(p);
+            });
+            container.appendChild(row);
+          }
+        });
+      });
+    });
+  }
+
+  function selectCat(pill, val, containerId) {
+    document.querySelectorAll(`#${containerId} .pill`).forEach(p => p.classList.remove('active'));
+    pill.classList.add('active');
     document.getElementById('catTorneo').value = val;
   }
 
-  const j1PillGroups = {};
-  const j2PillGroups = {};
-
-  function selectCatJ(el, fieldId, val) {
-    const parent = el.closest('.cat-pills');
-    parent.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
-    el.classList.add('active');
+  function selectCatJ(pill, val, containerId) {
+    const fieldId = containerId.replace('Container', '');
+    document.querySelectorAll(`#${containerId} .pill`).forEach(p => p.classList.remove('active'));
+    pill.classList.add('active');
     document.getElementById(fieldId).value = val;
   }
 
+  // Init all pill containers
+  makeTorneoPills('catTorneoContainer', selectCat);
+  makeJugadorPills('j1catContainer', selectCatJ);
+  makeJugadorPills('j2catContainer', selectCatJ);
+
+  // ── GENERATE MESSAGE ───────────────────────────────────────────
   function generar() {
     const torneo  = document.getElementById('torneoTipo').value;
     const sede    = document.getElementById('sede').value;
@@ -495,15 +601,12 @@
     const out = document.getElementById('output');
     out.textContent = msg;
     out.classList.remove('empty');
-
-    const copyBtn = document.getElementById('copyBtn');
-    copyBtn.classList.remove('copied');
+    document.getElementById('copyBtn').classList.remove('copied');
   }
 
   function copiar() {
     const text = document.getElementById('output').textContent;
     if (!text || text === 'El mensaje aparecerá aquí…') return;
-
     navigator.clipboard.writeText(text).then(() => {
       const btn = document.getElementById('copyBtn');
       btn.textContent = '✓  COPIADO';
@@ -520,7 +623,6 @@
       document.getElementById(id).value = '';
     });
     document.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
-    catTorneoSeleccionada = '';
     const out = document.getElementById('output');
     out.textContent = 'El mensaje aparecerá aquí…';
     out.classList.add('empty');
