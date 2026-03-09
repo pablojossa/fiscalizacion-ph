@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fiscalización PH — Generador de Consultas</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0a;
+    --surface: #141414;
+    --surface2: #1e1e1e;
+    --border: #2a2a2a;
+    --accent: #c8a84b;
+    --accent2: #e8c96a;
+    --text: #f0f0f0;
+    --muted: #666;
+    --success: #4caf82;
+    --radius: 10px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 40px 20px 60px;
+  }
+
+  /* HEADER */
+  header {
+    text-align: center;
+    margin-bottom: 40px;
+  }
+
+  .logo-line {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    margin-bottom: 6px;
+  }
+
+  .logo-badge {
+    background: var(--accent);
+    color: #000;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 11px;
+    letter-spacing: 2px;
+    padding: 3px 10px;
+    border-radius: 3px;
+  }
+
+  h1 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(32px, 6vw, 52px);
+    letter-spacing: 3px;
+    line-height: 1;
+    color: var(--text);
+  }
+
+  h1 span { color: var(--accent); }
+
+  .subtitle {
+    font-size: 13px;
+    color: var(--muted);
+    letter-spacing: 1px;
+    margin-top: 8px;
+    text-transform: uppercase;
+  }
+
+  /* MAIN CARD */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 32px;
+    width: 100%;
+    max-width: 560px;
+  }
+
+  /* SECTION LABEL */
+  .section-label {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 13px;
+    letter-spacing: 3px;
+    color: var(--accent);
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .section-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  /* PLAYER BLOCK */
+  .player-block {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    margin-bottom: 12px;
+  }
+
+  .player-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 28px;
+    color: var(--accent);
+    line-height: 1;
+    margin-bottom: 14px;
+  }
+
+  .field-group {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  label {
+    font-size: 11px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 4px;
+    display: block;
+  }
+
+  input, select {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    padding: 11px 14px;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  input:focus, select:focus {
+    border-color: var(--accent);
+  }
+
+  input::placeholder { color: #3a3a3a; }
+
+  select option { background: #1a1a1a; }
+
+  /* EXTRA INFO */
+  .extra-block {
+    margin-top: 20px;
+  }
+
+  .row2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-top: 0;
+  }
+
+  /* RESULT */
+  .result-area {
+    margin-top: 20px;
+  }
+
+  .message-box {
+    background: #0f1a12;
+    border: 1px solid #2a4a35;
+    border-radius: var(--radius);
+    padding: 20px;
+    font-size: 14px;
+    line-height: 1.7;
+    white-space: pre-wrap;
+    color: #d0f0d8;
+    font-family: 'DM Sans', sans-serif;
+    min-height: 80px;
+    word-break: break-word;
+  }
+
+  .message-box.empty {
+    color: #2a4a35;
+    font-style: italic;
+  }
+
+  /* BUTTONS */
+  .btn-row {
+    display: flex;
+    gap: 10px;
+    margin-top: 16px;
+  }
+
+  button {
+    cursor: pointer;
+    border: none;
+    font-family: 'Bebas Neue', sans-serif;
+    letter-spacing: 2px;
+    border-radius: 8px;
+    transition: all 0.15s;
+  }
+
+  .btn-primary {
+    background: var(--accent);
+    color: #000;
+    font-size: 15px;
+    padding: 13px 24px;
+    flex: 1;
+  }
+
+  .btn-primary:hover { background: var(--accent2); transform: translateY(-1px); }
+
+  .btn-secondary {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    font-size: 14px;
+    padding: 13px 18px;
+  }
+
+  .btn-secondary:hover { border-color: var(--accent); color: var(--accent); }
+
+  .btn-copy {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-size: 14px;
+    padding: 12px 20px;
+    width: 100%;
+    margin-top: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 600;
+    border-radius: 8px;
+  }
+
+  .btn-copy:hover { background: var(--accent); color: #000; border-color: var(--accent); }
+
+  .btn-copy.copied { background: var(--success); color: #fff; border-color: var(--success); }
+
+  /* NOTICE */
+  .notice {
+    background: #1a1500;
+    border: 1px solid #3a3000;
+    border-radius: 8px;
+    padding: 12px 16px;
+    font-size: 12px;
+    color: #a08030;
+    margin-top: 16px;
+    line-height: 1.5;
+  }
+
+  .divider { height: 1px; background: var(--border); margin: 24px 0; }
+
+  /* CATEGORY PILLS */
+  .cat-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 8px;
+  }
+
+  .pill {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 4px 12px;
+    font-size: 12px;
+    cursor: pointer;
+    color: var(--muted);
+    transition: all 0.15s;
+    user-select: none;
+  }
+
+  .pill:hover, .pill.active {
+    background: var(--accent);
+    color: #000;
+    border-color: var(--accent);
+  }
+
+  @media (max-width: 480px) {
+    .row2 { grid-template-columns: 1fr; }
+    .btn-row { flex-direction: column; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo-line">
+    <span class="logo-badge">PADEL HOUSE</span>
+  </div>
+  <h1>FISCALIZACIÓN <span>PH</span></h1>
+  <p class="subtitle">Generador de consultas para WhatsApp</p>
+</header>
+
+<div class="card">
+
+  <!-- TORNEO INFO -->
+  <div class="section-label">Información del torneo</div>
+  <div class="field-group" style="margin-bottom:20px;">
+    <div class="row2">
+      <div>
+        <label>Torneo</label>
+        <select id="torneoTipo">
+          <option value="PH250">PH250</option>
+          <option value="PH500">PH500</option>
+          <option value="PHMASTER">PHMASTER</option>
+          <option value="Relámpago">Relámpago</option>
+          <option value="Interclubes">Interclubes</option>
+        </select>
+      </div>
+      <div>
+        <label>Sede</label>
+        <select id="sede">
+          <option value="Galicia">Galicia</option>
+          <option value="Pinares">Pinares</option>
+          <option value="Ambas sedes">Ambas sedes</option>
+        </select>
+      </div>
+    </div>
+    <div style="margin-top:12px;">
+      <label>Fecha del torneo</label>
+      <input type="date" id="fechaTorneo">
+    </div>
+    <div>
+      <label>Categoría del torneo</label>
+      <div class="cat-pills" id="catPills">
+        <span class="pill" onclick="selectCat(this,'1ra')">1ra</span>
+        <span class="pill" onclick="selectCat(this,'2da')">2da</span>
+        <span class="pill" onclick="selectCat(this,'3ra')">3ra</span>
+        <span class="pill" onclick="selectCat(this,'4ta')">4ta</span>
+        <span class="pill" onclick="selectCat(this,'5ta')">5ta</span>
+        <span class="pill" onclick="selectCat(this,'Femenino')">Femenino</span>
+        <span class="pill" onclick="selectCat(this,'Mixto')">Mixto</span>
+      </div>
+      <input type="text" id="catTorneo" placeholder="O escribe la categoría…" style="margin-top:8px;">
+    </div>
+  </div>
+
+  <!-- JUGADOR 1 -->
+  <div class="section-label">Pareja</div>
+
+  <div class="player-block">
+    <div class="player-num">01</div>
+    <div class="field-group">
+      <div>
+        <label>Nombre completo</label>
+        <input type="text" id="j1nombre" placeholder="Ej: Carlos Ramírez">
+      </div>
+      <div>
+        <label>Categoría en fiscalización</label>
+        <div class="cat-pills">
+          <span class="pill" onclick="selectCatJ(this,'j1cat','1ra')">1ra</span>
+          <span class="pill" onclick="selectCatJ(this,'j1cat','2da')">2da</span>
+          <span class="pill" onclick="selectCatJ(this,'j1cat','3ra')">3ra</span>
+          <span class="pill" onclick="selectCatJ(this,'j1cat','4ta')">4ta</span>
+          <span class="pill" onclick="selectCatJ(this,'j1cat','5ta')">5ta</span>
+        </div>
+        <input type="text" id="j1cat" placeholder="O escribe la categoría…" style="margin-top:8px;">
+      </div>
+    </div>
+  </div>
+
+  <!-- JUGADOR 2 -->
+  <div class="player-block">
+    <div class="player-num">02</div>
+    <div class="field-group">
+      <div>
+        <label>Nombre completo</label>
+        <input type="text" id="j2nombre" placeholder="Ej: Andrés Mejía">
+      </div>
+      <div>
+        <label>Categoría en fiscalización</label>
+        <div class="cat-pills">
+          <span class="pill" onclick="selectCatJ(this,'j2cat','1ra')">1ra</span>
+          <span class="pill" onclick="selectCatJ(this,'j2cat','2da')">2da</span>
+          <span class="pill" onclick="selectCatJ(this,'j2cat','3ra')">3ra</span>
+          <span class="pill" onclick="selectCatJ(this,'j2cat','4ta')">4ta</span>
+          <span class="pill" onclick="selectCatJ(this,'j2cat','5ta')">5ta</span>
+        </div>
+        <input type="text" id="j2cat" placeholder="O escribe la categoría…" style="margin-top:8px;">
+      </div>
+    </div>
+  </div>
+
+  <!-- OBSERVACION -->
+  <div class="extra-block">
+    <label>Observación / pregunta adicional (opcional)</label>
+    <input type="text" id="obs" placeholder="Ej: Uno de los jugadores subió de categoría esta semana">
+  </div>
+
+  <div class="btn-row" style="margin-top:20px;">
+    <button class="btn-primary" onclick="generar()">GENERAR MENSAJE</button>
+    <button class="btn-secondary" onclick="limpiar()">LIMPIAR</button>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- RESULTADO -->
+  <div class="section-label">Mensaje generado</div>
+
+  <div class="message-box empty" id="output">El mensaje aparecerá aquí…</div>
+
+  <button class="btn-copy" id="copyBtn" onclick="copiar()">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+    COPIAR PARA WHATSAPP
+  </button>
+
+  <div class="notice">
+    💡 El mensaje se formatea automáticamente para WhatsApp. Solo cópialo y pégalo en el grupo de fiscalización.
+  </div>
+
+</div>
+
+<script>
+  let catTorneoSeleccionada = '';
+
+  function selectCat(el, val) {
+    document.querySelectorAll('#catPills .pill').forEach(p => p.classList.remove('active'));
+    el.classList.add('active');
+    catTorneoSeleccionada = val;
+    document.getElementById('catTorneo').value = val;
+  }
+
+  const j1PillGroups = {};
+  const j2PillGroups = {};
+
+  function selectCatJ(el, fieldId, val) {
+    const parent = el.closest('.cat-pills');
+    parent.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
+    el.classList.add('active');
+    document.getElementById(fieldId).value = val;
+  }
+
+  function generar() {
+    const torneo  = document.getElementById('torneoTipo').value;
+    const sede    = document.getElementById('sede').value;
+    const cat     = document.getElementById('catTorneo').value.trim();
+    const fechaRaw = document.getElementById('fechaTorneo').value;
+    const j1n     = document.getElementById('j1nombre').value.trim();
+    const j1c     = document.getElementById('j1cat').value.trim();
+    const j2n     = document.getElementById('j2nombre').value.trim();
+    const j2c     = document.getElementById('j2cat').value.trim();
+    const obs     = document.getElementById('obs').value.trim();
+
+    if (!j1n || !j1c || !j2n || !j2c) {
+      alert('Por favor completa los nombres y categorías de ambos jugadores.');
+      return;
+    }
+
+    const catDisplay = cat ? cat : '—';
+
+    let fechaDisplay = '—';
+    if (fechaRaw) {
+      const [y, m, d] = fechaRaw.split('-');
+      const dias = ['domingo','lunes','martes','miércoles','jueves','viernes','sábado'];
+      const meses = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+      const dt = new Date(Number(y), Number(m)-1, Number(d));
+      fechaDisplay = `${dias[dt.getDay()]} ${Number(d)} de ${meses[Number(m)-1]} de ${y}`;
+    }
+
+    let msg = '';
+    msg += `🎾 *CONSULTA DE FISCALIZACIÓN*\n`;
+    msg += `━━━━━━━━━━━━━━━━━━━━\n`;
+    msg += `🏆 *Torneo:* ${torneo} — ${catDisplay}\n`;
+    msg += `📅 *Fecha:* ${fechaDisplay}\n`;
+    msg += `📍 *Sede:* ${sede}\n`;
+    msg += `━━━━━━━━━━━━━━━━━━━━\n\n`;
+    msg += `*PAREJA CONSULTADA*\n\n`;
+    msg += `👤 *Jugador 1*\n`;
+    msg += `• Nombre: ${j1n}\n`;
+    msg += `• Categoría en fiscalización: *${j1c}*\n\n`;
+    msg += `👤 *Jugador 2*\n`;
+    msg += `• Nombre: ${j2n}\n`;
+    msg += `• Categoría en fiscalización: *${j2c}*\n\n`;
+    msg += `━━━━━━━━━━━━━━━━━━━━\n`;
+    msg += `❓ *¿Puede esta pareja jugar en la categoría ${catDisplay}?*`;
+
+    if (obs) {
+      msg += `\n\n📝 *Observación:* ${obs}`;
+    }
+
+    const out = document.getElementById('output');
+    out.textContent = msg;
+    out.classList.remove('empty');
+
+    const copyBtn = document.getElementById('copyBtn');
+    copyBtn.classList.remove('copied');
+  }
+
+  function copiar() {
+    const text = document.getElementById('output').textContent;
+    if (!text || text === 'El mensaje aparecerá aquí…') return;
+
+    navigator.clipboard.writeText(text).then(() => {
+      const btn = document.getElementById('copyBtn');
+      btn.textContent = '✓  COPIADO';
+      btn.classList.add('copied');
+      setTimeout(() => {
+        btn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg> COPIAR PARA WHATSAPP`;
+        btn.classList.remove('copied');
+      }, 2500);
+    });
+  }
+
+  function limpiar() {
+    ['j1nombre','j1cat','j2nombre','j2cat','obs','catTorneo','fechaTorneo'].forEach(id => {
+      document.getElementById(id).value = '';
+    });
+    document.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
+    catTorneoSeleccionada = '';
+    const out = document.getElementById('output');
+    out.textContent = 'El mensaje aparecerá aquí…';
+    out.classList.add('empty');
+  }
+</script>
+</body>
+</html>
